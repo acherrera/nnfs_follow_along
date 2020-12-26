@@ -98,6 +98,7 @@ activation2 = Activation_Softmax()
 
 loss_function = Loss_CategoricalCrossEntropy()
 
+
 # Now we want to keep track of what we are using
 lowest_loss = 999999
 best_dense1_weights = dense1.weights.copy()
@@ -108,10 +109,10 @@ best_dense2_biases = dense2.biases.copy()
 
 for iteration in range(10000):
 
-    dense1.weights += 0.05*np.random.randn(2,3)
-    dense1.biases += 0.05*np.random.randn(1,3)
-    dense2.weights += 0.05*np.random.randn(3,3)
-    dense2.biases += 0.05*np.random.randn(1,3)
+    dense1.weights = 0.05*np.random.randn(2,3)
+    dense1.biases = 0.05*np.random.randn(1,3)
+    dense2.weights = 0.05*np.random.randn(3,3)
+    dense2.biases = 0.05*np.random.randn(1,3)
 
     # Run layer1
     dense1.forward(X)
@@ -127,23 +128,21 @@ for iteration in range(10000):
 
     if loss < lowest_loss:
         # Update with new values
-        print(f"New values --> Iteration: {iteration}\tLoss: \
+        print(f"New weights found:\tIteration: {iteration}\tLoss: \
         {loss}\tAccuracy: {accuracy}")
         best_dense1_weights = dense1.weights.copy()
         best_dense1_biases = dense1.biases.copy()
         best_dense2_weights = dense2.weights.copy()
         best_dense2_biases = dense2.biases.copy()
         lowest_loss = loss
-        best_accuracy = accuracy
-        best_iteration = iteration
 
     else:
-        # Reset values to best values
         dense1.weights = best_dense1_weights
         dense1.biases = best_dense1_biases
         dense2.weights = best_dense2_weights
         dense2.biases = best_dense2_biases
 
+
 print("FINAL RESULTS: ")
-print(f"New values --> Iteration: {best_iteration}\tLoss: \
-{lowest_loss}\tAccuracy: {best_accuracy}")
+print(f"New weights found:\tIteration: {iteration}\tLoss: \
+{loss}\tAccuracy: {accuracy}")
