@@ -21,6 +21,12 @@ class Layer_Dense:
     def forward(self, inputs):
         self.output = np.dot(inputs, self.weights) + self.biases
 
+    def backwards(self, dvalues):
+        self.dweights = np.dot(self.inputs.T, dvalues)
+        self.dbiases = np.sum(dvalues, axis=0, keepdims=True)
+        # Apply gradients to values
+        self.dinputs = np.dot(dvalues, self.weights.T)
+
 
 class Activation_RelU:
     def __init__(self):
@@ -30,7 +36,13 @@ class Activation_RelU:
         pass
     
     def forward(self, inputs):
+        self.inputs = inputs 
         self.output = np.maximum(0, inputs)
+
+    def backwards(self, dvalues):
+        # Copy the variables before moding it
+        self.dinputs = dvalues.copy()
+        self.dinputs[self.inputs <=0] = 0
 
 
 class Activation_Softmax:
