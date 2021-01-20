@@ -19,6 +19,7 @@ class Layer_Dense:
 
 
     def forward(self, inputs):
+        self.inputs = inputs
         self.output = np.dot(inputs, self.weights) + self.biases
 
     def backwards(self, dvalues):
@@ -28,7 +29,7 @@ class Layer_Dense:
         self.dinputs = np.dot(dvalues, self.weights.T)
 
 
-class Activation_RelU:
+class Activation_ReLU:
     def __init__(self):
         """
         Activates the nuerons
@@ -82,6 +83,7 @@ class Loss:
         to build upon
         """
         pass
+
     def calculate(self, output, y):
         """
         output: output of the model
@@ -142,8 +144,7 @@ class Loss_CategoricalCrossEntropy(Loss):
         self.dinputs = -y_true / dvalues
         self.dinputs = self.dinputs / samples
 
-
-class Activation_Softmax_Loss_CategoricalCrossEntropy():
+class Activation_Softmax_Loss_CategoricalCrossentropy():
 
     def __init__(self):
         """
@@ -190,13 +191,52 @@ class Activation_Softmax_Loss_CategoricalCrossEntropy():
 
 if __name__ == "__main__":
 
-    softmax_outputs = np.array([[0.7, 0.1, 0.2],
-                               [0.1, 0.5, 0.4],
-                               [0.02, 0.9, 0.08]])
+    import nnfs
+    from nnfs.datasets import spiral_data
 
-    class_targets = np.array([1,0,0])
+    nnfs.init()
 
-    softmax_loss = Activation_Softmax_Loss_CategoricalCrossEntropy()
-    import pudb; pudb.set_trace()
-    softmax_loss.backward(softmax_outputs, class_targets)
-    dvalues1 = softmax_loss.dinputs
+    # Create dataset
+    X, y = spiral_data(samples=100, classes=3)
+    # Create Dense layer with 2 input features and 3 output values
+    dense1 = Layer_Dense(2, 3)
+    # Create ReLU activation (to be used with Dense layer):
+    activation1 = Activation_ReLU()
+    # Create second Dense layer with 3 input features (as we take output
+    # of previous layer here) and 3 output values (output values)
+    dense2 = Layer_Dense(3, 3)
+    # Create Softmax classifier’s combined loss and activation
+    loss_activation = Activation_Softmax_Loss_CategoricalCrossentropy()
+    # Perform a forward pass of our training data through this layer
+    dense1.forward(X)
+    # Perform a forward pass through activation function
+    # takes the output of first dense layer here
+    activation1.forward(dense1.output)
+    # Perform a forward pass through second Dense layer
+    # takes outputs of activation function of first layer as inputs
+    dense2.forward(activation1.output)
+    # Perform a forward pass through the activation/loss function
+    # takes the output of second dense layer here and returns loss
+    loss = loss_activation.forward(dense2.output, y)
+
+    print(loss_activation.output[:5])
+    # Print loss value
+    print('loss:', loss)
+    # Calculate accuracy from output of activation2 and targets
+    # calculate values along first axis
+    predictions = np.argmax(loss_activation.output, axis=1)
+    if len(y.shape) == 2:
+        y = np.argmax(y, axis=1)
+    accuracy = np.mean(predictions == y)
+    # Print accuracy
+    print('acc:', accuracy)
+    # Backward pass
+    loss_activation.backward(loss_activation.output, y)
+    dense2.backward(loss_activation.dinputs)
+    activation1.backward(dense2.dinputs)
+    dense1.backward(activation1.dinputs)
+    # Print gradients
+    print(dense1.dweights)
+    print(dense1.dbiases)
+    print(dense2.dweights)
+    print(dense2.dbiases)
