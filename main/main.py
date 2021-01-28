@@ -168,7 +168,7 @@ class Activation_Softmax_Loss_CategoricalCrossentropy():
         self.output = self.activation.output
         return self.loss.calculate(self.output, y_true)
 
-    def backward(self, dvalues, y_true):
+    def backwards(self, dvalues, y_true):
         """
         Run the functions backwards which resultsi in y-hat - y as shown in the derivation section of the NNFS book
         Args:
@@ -231,10 +231,10 @@ if __name__ == "__main__":
     # Print accuracy
     print('acc:', accuracy)
     # Backward pass
-    loss_activation.backward(loss_activation.output, y)
-    dense2.backward(loss_activation.dinputs)
-    activation1.backward(dense2.dinputs)
-    dense1.backward(activation1.dinputs)
+    loss_activation.backwards(loss_activation.output, y)
+    dense2.backwards(loss_activation.dinputs)
+    activation1.backwards(dense2.dinputs)
+    dense1.backwards(activation1.dinputs)
     # Print gradients
     print(dense1.dweights)
     print(dense1.dbiases)
