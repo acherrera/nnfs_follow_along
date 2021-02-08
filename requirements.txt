@@ -1,3 +1,4 @@
 nnfs
 numpy
 matplotlib
+jypyterlab
